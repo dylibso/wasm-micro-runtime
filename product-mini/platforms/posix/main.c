@@ -859,12 +859,12 @@ main(int argc, char *argv[])
         free(json);
         return print_help();
     }
-    struct json_object_s *object = json->payload;
+    const struct json_object_s *object = json->payload;
     static const char *const keys[] = { "MAP", "NET", "ARGV", "ENV",
                                         "ENTRYPOINT" };
-    for (struct json_object_element_s *item = object->start; item != NULL;
+    for (const struct json_object_element_s *item = object->start; item != NULL;
          item = item->next) {
-        struct json_string_s *name = item->name;
+        const struct json_string_s *name = item->name;
         bool found = false;
         for (size_t i = 0; i < sizeof(keys) / sizeof(keys[0]); i++) {
             const size_t key_len = strlen(keys[i]);
