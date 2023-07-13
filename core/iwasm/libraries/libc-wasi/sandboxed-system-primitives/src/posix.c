@@ -60,6 +60,7 @@ static_assert(sizeof(struct iovec) == sizeof(__wasi_ciovec_t),
 static __wasi_errno_t
 convert_errno(int error)
 {
+    /*
     static const __wasi_errno_t errors[] = {
 #define X(v) [v] = __WASI_##v
         X(E2BIG),
@@ -152,6 +153,8 @@ convert_errno(int error)
         || errors[error] == 0)
         return __WASI_ENOSYS;
     return errors[error];
+    */
+    return __WASI_ENOSYS;
 }
 
 static bool
@@ -3424,7 +3427,8 @@ argv_environ_init(struct argv_environ_values *argv_environ, char *argv_buf,
 
 void
 argv_environ_destroy(struct argv_environ_values *argv_environ)
-{}
+{
+}
 
 void
 fd_table_destroy(struct fd_table *ft)

@@ -282,7 +282,7 @@
 /* Disable native stack access boundary check with hardware
  * trap or not, enable it by default if it is supported */
 #ifndef WASM_DISABLE_STACK_HW_BOUND_CHECK
-#define WASM_DISABLE_STACK_HW_BOUND_CHECK 0
+#define WASM_DISABLE_STACK_HW_BOUND_CHECK 1
 #endif
 
 /* Disable SIMD unless it is manualy enabled somewhere */

@@ -822,12 +822,21 @@ main(int argc, char *argv[])
             return print_help();
     }
 
-    if (argc == 0)
-        return print_help();
+    // if (argc == 0)
+    //     return print_help();
 
-    wasm_file = argv[0];
-    app_argc = argc;
-    app_argv = argv;
+    app_argc = argc + 1;
+    app_argv = malloc(app_argc * sizeof(char *) + 1);
+    app_argv[0] = "/zip/cowsay.wasm";
+    for (int i = 0; i < argc; i++) {
+        app_argv[i + 1] = argv[i];
+    }
+    app_argv[app_argc] = NULL;
+    wasm_file = app_argv[0];
+    argv = app_argv;
+    argc = app_argc;
+    //  app_argc = argc;
+    //  app_argv = argv;
 
     memset(&init_args, 0, sizeof(RuntimeInitArgs));
 
