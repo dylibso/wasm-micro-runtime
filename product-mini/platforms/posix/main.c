@@ -12,6 +12,7 @@
 
 #include "bh_platform.h"
 #include "bh_read_file.h"
+#include "json.h"
 #include "wasm_export.h"
 
 #if BH_HAS_DLFCN
@@ -824,10 +825,62 @@ main(int argc, char *argv[])
 
     // if (argc == 0)
     //     return print_help();
-
+    FILE *json_file = fopen("/zip/hermit.json", "rb");
+    if (json_file == NULL) {
+        return print_help();
+    }
+    if (fseek(json_file, 0, SEEK_END) != 0) {
+        fclose(json_file);
+        return print_help();
+    }
+    const int size = ftell(json_file);
+    if (size < 0) {
+        fclose(json_file);
+        return print_help();
+    }
+    rewind(json_file);
+    char *json_bytes = malloc(size);
+    if (json_bytes == NULL) {
+        fclose(json_file);
+        return print_help();
+    }
+    const int fread_status = fread(json_bytes, size, 1, json_file);
+    fclose(json_file);
+    if (fread_status != 1) {
+        free(json_bytes);
+        return print_help();
+    }
+    struct json_value_s *json = json_parse(json_bytes, size);
+    free(json_bytes);
+    if (json == NULL) {
+        return print_help();
+    }
+    if (json->type != json_type_object) {
+        free(json);
+        return print_help();
+    }
+    struct json_object_s *object = json->payload;
+    static const char *const keys[] = { "MAP", "NET", "ARGV", "ENV",
+                                        "ENTRYPOINT" };
+    for (struct json_object_element_s *item = object->start; item != NULL;
+         item = item->next) {
+        struct json_string_s *name = item->name;
+        bool found = false;
+        for (size_t i = 0; i < sizeof(keys) / sizeof(keys[0]); i++) {
+            const size_t key_len = strlen(keys[i]);
+            if ((key_len == name->string_size)
+                && (memcmp(name->string, keys[i], name->string_size) == 0)) {
+                found = true;
+                break;
+            }
+        }
+        fprintf(stderr, "hermit_loader: %s key: %.*s\n",
+                (found ? "found" : "unknown"), name->string_size, name->string);
+    }
+    free(json);
     app_argc = argc + 1;
     app_argv = malloc(app_argc * sizeof(char *) + 1);
-    app_argv[0] = "/zip/cowsay.wasm";
+    app_argv[0] = "/zip/main.wasm";
     for (int i = 0; i < argc; i++) {
         app_argv[i + 1] = argv[i];
     }
