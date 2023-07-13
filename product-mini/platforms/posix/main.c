@@ -527,6 +527,12 @@ timeout_thread(void *vp)
     return NULL;
 }
 #endif
+static bool
+is_string(const char *sz_string, const char bytes[], const size_t num_bytes)
+{
+    const size_t sz_len = strlen(sz_string);
+    return (sz_len == num_bytes) && (memcmp(sz_string, bytes, num_bytes) == 0);
+}
 
 int
 main(int argc, char *argv[])
@@ -867,10 +873,20 @@ main(int argc, char *argv[])
         const struct json_string_s *name = item->name;
         bool found = false;
         for (size_t i = 0; i < sizeof(keys) / sizeof(keys[0]); i++) {
-            const size_t key_len = strlen(keys[i]);
-            if ((key_len == name->string_size)
-                && (memcmp(name->string, keys[i], name->string_size) == 0)) {
+            if (is_string(keys[i], name->string, name->string_size)) {
                 found = true;
+                if (is_string("ENTRYPOINT", name->string, name->string_size)) {
+                    if (item->value->type != json_type_string) {
+                        free(json);
+                        fprintf(stderr, "ENTRYPOINT is not a string!\n");
+                        return print_help();
+                    }
+                    const struct json_string_s *value = item->value->payload;
+                    char *temp_func = malloc(value->string_size + 1);
+                    memcpy(temp_func, value->string, value->string_size);
+                    temp_func[value->string_size] = '\0';
+                    func_name = temp_func;
+                }
                 break;
             }
         }
