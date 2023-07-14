@@ -1,6 +1,5 @@
 {
     "MAP": [],
     "ENV": "",
-    "unused": {},
-    "ENTRYPOINT": "_start"
+    "unused": {}
 }
