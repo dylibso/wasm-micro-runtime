@@ -12,7 +12,6 @@
 
 #include "bh_platform.h"
 #include "bh_read_file.h"
-#include "json.h"
 #include "wasm_export.h"
 
 #if BH_HAS_DLFCN
@@ -527,12 +526,6 @@ timeout_thread(void *vp)
     return NULL;
 }
 #endif
-static bool
-is_string(const char *sz_string, const char bytes[], const size_t num_bytes)
-{
-    const size_t sz_len = strlen(sz_string);
-    return (sz_len == num_bytes) && (memcmp(sz_string, bytes, num_bytes) == 0);
-}
 
 int
 main(int argc, char *argv[])
@@ -829,83 +822,12 @@ main(int argc, char *argv[])
             return print_help();
     }
 
-    // if (argc == 0)
-    //     return print_help();
-    FILE *json_file = fopen("/zip/hermit.json", "rb");
-    if (json_file == NULL) {
+    if (argc == 0)
         return print_help();
-    }
-    if (fseek(json_file, 0, SEEK_END) != 0) {
-        fclose(json_file);
-        return print_help();
-    }
-    const int size = ftell(json_file);
-    if (size < 0) {
-        fclose(json_file);
-        return print_help();
-    }
-    rewind(json_file);
-    char *json_bytes = malloc(size);
-    if (json_bytes == NULL) {
-        fclose(json_file);
-        return print_help();
-    }
-    const int fread_status = fread(json_bytes, size, 1, json_file);
-    fclose(json_file);
-    if (fread_status != 1) {
-        free(json_bytes);
-        return print_help();
-    }
-    struct json_value_s *json = json_parse(json_bytes, size);
-    free(json_bytes);
-    if (json == NULL) {
-        return print_help();
-    }
-    if (json->type != json_type_object) {
-        free(json);
-        return print_help();
-    }
-    const struct json_object_s *object = json->payload;
-    static const char *const keys[] = { "MAP", "NET", "ARGV", "ENV",
-                                        "ENTRYPOINT" };
-    for (const struct json_object_element_s *item = object->start; item != NULL;
-         item = item->next) {
-        const struct json_string_s *name = item->name;
-        bool found = false;
-        for (size_t i = 0; i < sizeof(keys) / sizeof(keys[0]); i++) {
-            if (is_string(keys[i], name->string, name->string_size)) {
-                found = true;
-                if (is_string("ENTRYPOINT", name->string, name->string_size)) {
-                    if (item->value->type != json_type_string) {
-                        free(json);
-                        fprintf(stderr, "ENTRYPOINT is not a string!\n");
-                        return print_help();
-                    }
-                    const struct json_string_s *value = item->value->payload;
-                    char *temp_func = malloc(value->string_size + 1);
-                    memcpy(temp_func, value->string, value->string_size);
-                    temp_func[value->string_size] = '\0';
-                    func_name = temp_func;
-                }
-                break;
-            }
-        }
-        fprintf(stderr, "hermit_loader: %s key: %.*s\n",
-                (found ? "found" : "unknown"), name->string_size, name->string);
-    }
-    free(json);
-    app_argc = argc + 1;
-    app_argv = malloc(app_argc * sizeof(char *) + 1);
-    app_argv[0] = "/zip/main.wasm";
-    for (int i = 0; i < argc; i++) {
-        app_argv[i + 1] = argv[i];
-    }
-    app_argv[app_argc] = NULL;
-    wasm_file = app_argv[0];
-    argv = app_argv;
-    argc = app_argc;
-    //  app_argc = argc;
-    //  app_argv = argv;
+
+    wasm_file = argv[0];
+    app_argc = argc;
+    app_argv = argv;
 
     memset(&init_args, 0, sizeof(RuntimeInitArgs));
 

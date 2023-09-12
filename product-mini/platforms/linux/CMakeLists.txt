@@ -154,13 +154,12 @@ include (${SHARED_DIR}/utils/uncommon/shared_uncommon.cmake)
 add_executable (iwasm main.c ${UNCOMMON_SHARED_SOURCE})
 
 set_target_properties (iwasm PROPERTIES POSITION_INDEPENDENT_CODE ON)
-set_target_properties (iwasm PROPERTIES OUTPUT_NAME iwasm.com)
+
 install (TARGETS iwasm DESTINATION bin)
 
 target_link_libraries (iwasm vmlib ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS} ${WASI_NN_LIBS} -lm -ldl -lpthread)
 
-#add_library (libiwasm SHARED ${WAMR_RUNTIME_LIB_SOURCE})
-add_library (libiwasm STATIC ${WAMR_RUNTIME_LIB_SOURCE})
+add_library (libiwasm SHARED ${WAMR_RUNTIME_LIB_SOURCE})
 
 install (TARGETS libiwasm DESTINATION lib)
 

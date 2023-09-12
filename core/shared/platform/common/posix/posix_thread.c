@@ -571,7 +571,7 @@ signal_callback(int sig_num, siginfo_t *sig_info, void *sig_ucontext)
         abort();
     }
 }
-#define WASM_DISABLE_STACK_HW_BOUND_CHECK 1
+
 int
 os_thread_signal_init(os_signal_handler handler)
 {
