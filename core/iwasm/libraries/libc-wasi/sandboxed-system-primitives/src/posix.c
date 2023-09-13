@@ -145,18 +145,15 @@ convert_errno(int error)
         X(ETXTBSY)
         X(EXDEV)
         default:
-            if (error == EOPNOTSUPP) {
+            if (error == EOPNOTSUPP)
                 code = __WASI_ENOTSUP;
-            }
-            else if (code == EWOULDBLOCK) {
+            else if (code == EWOULDBLOCK)
                 code = __WASI_EAGAIN;
-            }
             break;
     }
 #undef X
-    if (code == 0) {
+    if (code == 0)
         return __WASI_ENOSYS;
-    }
     return code;
 }
 
@@ -3430,7 +3427,8 @@ argv_environ_init(struct argv_environ_values *argv_environ, char *argv_buf,
 
 void
 argv_environ_destroy(struct argv_environ_values *argv_environ)
-{}
+{
+}
 
 void
 fd_table_destroy(struct fd_table *ft)
