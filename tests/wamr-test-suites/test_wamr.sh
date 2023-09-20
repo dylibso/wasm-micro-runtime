@@ -31,6 +31,7 @@ function help()
     echo "-Q enable qemu"
     echo "-F set the firmware path used by qemu"
     echo "-C enable code coverage collect"
+    echo "-j test cosmopolitan"
 }
 
 OPT_PARSED=""
@@ -57,7 +58,7 @@ ENABLE_QEMU=0
 QEMU_FIRMWARE=""
 WASI_TESTSUITE_COMMIT="aca78d919355ae00af141e6741a439039615b257"
 
-while getopts ":s:cabgvt:m:MCpSXxwPGQF:" opt
+while getopts ":s:cabgvt:m:MCpSXxwPGQFj:" opt
 do
     OPT_PARSED="TRUE"
     case $opt in
@@ -158,6 +159,10 @@ do
         F)
         echo "QEMU firmware" ${OPTARG}
         QEMU_FIRMWARE=${OPTARG}
+        ;;
+        j)
+        echo "test cosmopolitan"
+        PLATFORM="cosmopolitan"
         ;;
         ?)
         help
@@ -379,6 +384,8 @@ function spec_test()
         local WAT2WASM=${WORK_DIR}/wabt/out/gcc/Release/wat2wasm
         if [ ! -f ${WAT2WASM} ]; then
             case ${PLATFORM} in
+                cosmopolitan)
+                    ;&
                 linux)
                     WABT_PLATFORM=ubuntu
                     ;;
@@ -651,6 +658,18 @@ function build_iwasm_with_cfg()
     if [ "$?" != 0 ];then
         echo -e "build iwasm failed"
         exit 1
+    fi
+
+    if [[ ${PLATFORM} == "cosmopolitan" ]]; then
+        cp iwasm.com iwasm \
+        && ./iwasm --assimilate \
+        && rm -rf ../../linux/build \
+        && mkdir ../../linux/build \
+        && ln -s ../../cosmopolitan/build/iwasm ../../linux/build/iwasm
+        if [ "$?" != 0 ];then
+            echo -e "build iwasm failed (cosmopolitan)"
+            exit 1
+        fi
     fi
 }
 
