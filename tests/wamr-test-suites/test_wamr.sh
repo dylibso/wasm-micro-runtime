@@ -661,6 +661,8 @@ function build_iwasm_with_cfg()
     fi
 
     if [[ ${PLATFORM} == "cosmopolitan" ]]; then
+        # convert from APE to ELF so it can be ran easier
+        # HACK: link to linux so tests work when platform is detected by uname
         cp iwasm.com iwasm \
         && ./iwasm --assimilate \
         && rm -rf ../../linux/build \
