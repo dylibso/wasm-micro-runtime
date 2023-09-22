@@ -1,4 +1,5 @@
 # Copyright (C) 2019 Intel Corporation.  All rights reserved.
+# Copyright (C) 2023 Dylibso.  All rights reserved.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 set (PLATFORM_SHARED_DIR ${CMAKE_CURRENT_LIST_DIR})
